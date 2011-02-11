@@ -1,6 +1,6 @@
 package com.cybozu.labs.langdetect;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,17 +26,17 @@ public class DetectorTest {
         LangProfile profile_en = new LangProfile("en");
         for (String w : TRAINING_EN.split(" "))
             profile_en.add(w);
-        DetectorFactory.addProfile(profile_en, 0, 3);
+        DetectorFactory.addProfile(profile_en, 3);
 
         LangProfile profile_fr = new LangProfile("fr");
         for (String w : TRAINING_FR.split(" "))
             profile_fr.add(w);
-        DetectorFactory.addProfile(profile_fr, 1, 3);
+        DetectorFactory.addProfile(profile_fr, 3);
 
         LangProfile profile_ja = new LangProfile("ja");
         for (String w : TRAINING_JA.split(" "))
             profile_ja.add(w);
-        DetectorFactory.addProfile(profile_ja, 2, 3);
+        DetectorFactory.addProfile(profile_ja, 3);
     }
 
     @After

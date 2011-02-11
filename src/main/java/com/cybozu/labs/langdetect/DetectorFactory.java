@@ -1,15 +1,12 @@
 package com.cybozu.labs.langdetect;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.arnx.jsonic.JSON;
 import net.arnx.jsonic.JSONException;
-
-import org.springframework.core.io.ClassPathResource;
 
 import com.cybozu.labs.langdetect.util.LangProfile;
 
@@ -36,6 +33,7 @@ import com.cybozu.labs.langdetect.util.LangProfile;
 public class DetectorFactory {
     public HashMap<String, double[]> wordLangProbMap;
     public ArrayList<String> langlist;
+    private int langSize;
     private DetectorFactory() {
         wordLangProbMap = new HashMap<String, double[]>();
         langlist = new ArrayList<String>();
@@ -51,36 +49,26 @@ public class DetectorFactory {
      *                              or profile's format is wrong (error code = {@link ErrorCode#FormatError})
      * @throws IOException
      */
-    public static void loadProfile() throws LangDetectException {
+    public static void loadProfiles(String... langs) throws LangDetectException {
     	
-        File dir;
-		try {
-			dir = new ClassPathResource("profiles").getFile();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			throw new LangDetectException(ErrorCode.FileLoadError, "File load error..");
-		}
-        File[] listFiles = dir.listFiles();
-            
-        int langsize = listFiles.length, index = 0;
-        for (File file: listFiles) {
-            if (file.getName().startsWith(".") || !file.isFile()) continue;
-            FileInputStream is = null;
+    	for(int i=0; i<langs.length;i++){
+    	
+    		InputStream is = ClassLoader.getSystemResourceAsStream("profiles/"+langs[i]);
+    
             try {
-                is = new FileInputStream(file);
                 LangProfile profile = JSON.decode(is, LangProfile.class);
-                addProfile(profile, index, langsize);
-                ++index;
+                addProfile(profile, langs.length);
             } catch (JSONException e) {
-                throw new LangDetectException(ErrorCode.FormatError, "profile format error in '" + file.getName() + "'");
+                throw new LangDetectException(ErrorCode.FormatError, "profile format error in for: "+langs[i]);
             } catch (IOException e) {
-                throw new LangDetectException(ErrorCode.FileLoadError, "can't open '" + file.getName() + "'");
-            } finally {
+            	throw new LangDetectException(ErrorCode.FormatError, "profile format error in for: "+langs[i]);
+			} finally {
                 try {
                     if (is!=null) is.close();
                 } catch (IOException e) {}
             }
-        }
+        
+    	}
     }
 
     /**
@@ -89,7 +77,7 @@ public class DetectorFactory {
      * @param index
      * @throws LangDetectException
      */
-    static /* package scope */ void addProfile(LangProfile profile, int index, int langsize) throws LangDetectException {
+    static /* package scope */ void addProfile(LangProfile profile, int langsize) throws LangDetectException {
         String lang = profile.name;
         if (instance_.langlist.contains(lang)) {
             throw new LangDetectException(ErrorCode.DuplicateLangError, "duplicate the same language profile");
@@ -100,7 +88,7 @@ public class DetectorFactory {
                 instance_.wordLangProbMap.put(word, new double[langsize]);
             }
             double prob = profile.freq.get(word).doubleValue() / profile.n_words[word.length()-1];
-            instance_.wordLangProbMap.get(word)[index] = prob;
+            instance_.wordLangProbMap.get(word)[instance_.langlist.indexOf(profile.name)] = prob;
         }
     }
 
@@ -126,6 +114,7 @@ public class DetectorFactory {
      * Construct Detector instance with smoothing parameter
      * 
      * @param alpha smoothing parameter (default value = 0.5)
+     * @param langSize number of profiles
      * @return Detector instance
      * @throws LangDetectException
      */

@@ -11,7 +11,7 @@ public class RealWorldDetectionTest {
 
 	@BeforeClass
 	public static void setup() throws LangDetectException {
-		DetectorFactory.loadProfile();
+		DetectorFactory.loadProfiles("en", "fr", "es");
 	}
 	
 	String text_en = "I bring in the jar A dependency in jar B, my maven " +
