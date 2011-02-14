@@ -18,5 +18,5 @@ To import this artifact add this to your dependencies
 	<dependency>
 		<groupId>com.cybozu.labs</groupId>
 		<artifactId>langdetect</artifactId>
-		<version>1.2.1</version>
+		<version>1.2.2</version>
 	</dependency>
