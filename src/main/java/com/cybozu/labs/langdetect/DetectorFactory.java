@@ -53,7 +53,8 @@ public class DetectorFactory {
     	
     	for(int i=0; i<langs.length;i++){
     	
-    		InputStream is = ClassLoader.getSystemResourceAsStream("profiles/"+langs[i]);
+    		InputStream is = LangProfile.class.getClassLoader()
+    				.getResourceAsStream("profiles/"+langs[i]);
     
             try {
                 LangProfile profile = JSON.decode(is, LangProfile.class);
